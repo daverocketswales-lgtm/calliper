@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calliper</title>
+<style>
+:root{--bg1:#060914;--bg2:#0b1224;--bg3:#1f2937;--glass:rgba(255,255,255,.07);--line:rgba(255,255,255,.12);--text:#f3f4f6;--muted:#a6adbb;--accent:#3b82f6;--accent2:#60a5fa;--terminal-bg:#020403;--terminal-text:#3cff7a;--terminal-dim:#178f42;--terminal-glow:rgba(60,255,122,.28);--radius-xl:30px;--radius-lg:18px;--shadow:0 28px 80px rgba(0,0,0,.46);--mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;--sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",system-ui,sans-serif}
+body.amber{--terminal-bg:#1a0f05;--terminal-text:#ffb84d;--terminal-dim:#a7651c;--terminal-glow:rgba(255,184,77,.26)}
+body.blue{--terminal-bg:#020617;--terminal-text:#67e8f9;--terminal-dim:#0891b2;--terminal-glow:rgba(103,232,249,.25)}
+body.white{--terminal-bg:#080808;--terminal-text:#f8fafc;--terminal-dim:#94a3b8;--terminal-glow:rgba(248,250,252,.18)}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:var(--sans);color:var(--text);background:radial-gradient(circle at 18% 10%,rgba(59,130,246,.22),transparent 32%),radial-gradient(circle at 82% 18%,rgba(15,23,42,.78),transparent 36%),linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3))}
+.container{max-width:1160px;margin:auto;padding:30px 20px 46px}
+header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:28px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:48px;height:48px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:#000;box-shadow:0 12px 30px rgba(0,0,0,.45),0 0 24px var(--terminal-glow)}.logo img{width:100%;height:100%;object-fit:cover;display:block}
+h1{margin:0;font-size:32px;letter-spacing:-.04em}.header-controls{display:grid;gap:10px;justify-items:center}
+.nav,.theme-switch{display:flex;gap:7px;background:var(--glass);padding:6px;border-radius:999px;backdrop-filter:blur(24px);border:1px solid var(--line)}
+.nav button,.theme-switch button{border:none;padding:10px 16px;border-radius:999px;background:transparent;color:var(--muted);cursor:pointer;font-weight:800;transition:.22s ease}
+.nav button.active{background:#fff;color:#020617;box-shadow:0 10px 28px rgba(0,0,0,.24)}
+.theme-switch button{padding:7px 12px;font-size:11px}.theme-switch button.active{background:var(--terminal-text);color:var(--terminal-bg);box-shadow:0 0 18px var(--terminal-glow)}
+.page{display:none}.page.active{display:block;animation:rise .34s ease both}@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.card,.panel{background:var(--glass);backdrop-filter:blur(34px);border-radius:var(--radius-xl);box-shadow:var(--shadow);border:1px solid var(--line)}
+.card{padding:26px;max-width:850px;margin:0 auto;display:grid;gap:16px}.grid{display:grid;gap:16px}.row3{grid-template-columns:repeat(3,1fr)}
+label{display:block;color:var(--muted);font-size:13px;font-weight:800;margin-bottom:7px}
+textarea,input{width:100%;padding:14px;border-radius:var(--radius-lg);border:1px solid var(--terminal-dim);background:var(--terminal-bg);color:var(--terminal-text);font:inherit;outline:none;transition:.2s ease;text-shadow:0 0 10px var(--terminal-glow);box-shadow:inset 0 0 28px rgba(0,0,0,.75),0 0 20px var(--terminal-glow)}
+textarea{min-height:150px;resize:vertical;line-height:1.45;font-family:var(--mono);letter-spacing:.03em}input{font-family:var(--mono)}
+textarea::placeholder,input::placeholder{color:var(--terminal-dim)}textarea:focus,input:focus{border-color:var(--terminal-text);box-shadow:inset 0 0 28px rgba(0,0,0,.75),0 0 0 4px var(--terminal-glow),0 0 28px var(--terminal-glow)}
+.actions{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:nowrap}.primary,.secondary{border:none;padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:800;transition:.22s ease;font-size:12px}
+.primary{background:linear-gradient(180deg,var(--accent2),var(--accent));color:white;box-shadow:0 16px 34px rgba(59,130,246,.25)}.secondary{background:rgba(255,255,255,.08);color:white;border:1px solid var(--line)}.primary:hover,.secondary:hover{transform:translateY(-2px)}
+.toggle{display:flex;align-items:center;gap:9px;color:var(--muted);font-size:13px;font-weight:800}.toggle input{width:auto;margin:0;accent-color:var(--accent);box-shadow:none}
+.secure-indicator{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:18px;background:var(--terminal-bg);border:1px solid var(--terminal-dim);color:var(--terminal-text);text-shadow:0 0 10px var(--terminal-glow);box-shadow:inset 0 0 22px rgba(0,0,0,.72),0 0 22px var(--terminal-glow);font-weight:900}
+.secure-indicator:not(.active){background:rgba(0,0,0,.22);border-color:var(--line);color:var(--muted);box-shadow:none;text-shadow:none}.secure-indicator .status{font-family:var(--mono);font-size:12px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.08)}
+.note,.clip-status{color:var(--muted);font-size:13px;line-height:1.45;margin:0}.clip-status{color:var(--terminal-text);font-family:var(--mono);min-height:16px;text-align:center;text-shadow:0 0 10px var(--terminal-glow)}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:18px}.panel{padding:20px;display:flex;flex-direction:column;gap:14px;min-height:610px}.panel h2{margin:0;font-size:27px;letter-spacing:-.04em}.head{display:flex;justify-content:space-between;align-items:center;gap:12px}.badge{font-family:var(--mono);font-size:12px;color:var(--terminal-text);background:rgba(0,0,0,.32);border:1px solid var(--terminal-dim);border-radius:999px;padding:7px 10px;text-shadow:0 0 10px var(--terminal-glow)}
+.output{flex:1;background:var(--terminal-bg);color:var(--terminal-text);border:1px solid var(--terminal-dim);border-radius:var(--radius-lg);padding:18px;min-height:250px;font-family:var(--mono);line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;letter-spacing:.05em;text-shadow:0 0 10px var(--terminal-glow);box-shadow:inset 0 0 28px rgba(0,0,0,.75),0 0 24px var(--terminal-glow)}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:16px;padding:10px;color:var(--muted);font-size:12px}.stat strong{display:block;color:#fff;font-size:19px;margin-top:2px}
+.warning{display:none;border-radius:16px;padding:11px 13px;font-size:13px;line-height:1.35}.warning.show{display:block}.warning.warn{color:#fde68a;background:rgba(251,191,36,.13);border:1px solid rgba(251,191,36,.23)}.warning.bad{color:#fecaca;background:rgba(248,113,113,.13);border:1px solid rgba(248,113,113,.23)}
+.secure-mask{-webkit-text-security:disc}body.cipher-page .theme-switch{display:none}
+@media(max-width:850px){.split,.row3{grid-template-columns:1fr}.actions{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<div class="container">
+<header>
+  <div class="brand"><div class="logo">⌁</div><h1>Calliper</h1></div>
+  <div class="header-controls">
+    <div class="nav"><button id="setupBtn" type="button" class="active">Setup</button><button id="workBtn" type="button">Cipher Desk</button></div>
+    <div class="theme-switch"><button id="greenTheme" type="button" class="active">Green CRT</button><button id="amberTheme" type="button">Amber CRT</button><button id="blueTheme" type="button">Blue CRT</button><button id="whiteTheme" type="button">White Terminal</button></div>
+  </div>
+</header>
+
+<section id="setup" class="page active">
+  <div class="card">
+    <div id="secureIndicator" class="secure-indicator active"><span>🔒 Secure Mode</span><span id="secureStatus" class="status">ACTIVE</span></div>
+    <div><label for="lyrics">Song lyrics</label><textarea id="lyrics" placeholder="Paste the agreed song lyrics here..."></textarea></div>
+    <div class="grid row3"><div><label for="k1">Keyword 1</label><input id="k1" placeholder="Keyword 1"></div><div><label for="k2">Keyword 2</label><input id="k2" placeholder="Keyword 2"></div><div><label for="k3">Keyword 3</label><input id="k3" placeholder="Keyword 3"></div></div>
+    <div id="setupWarning" class="warning"></div>
+    <div class="actions"><button class="secondary" id="demoBtn" type="button">Load Demo</button><button class="secondary" id="clearSetup" type="button">Clear Setup</button><label class="toggle"><input type="checkbox" id="secureMode" checked> Secure mode</label></div>
+    <p class="note">Only A-Z letters are used. Punctuation, numbers and spaces are ignored. Output is continuous text. Encryption uses staged passes: lyrics + keyword 1, then keyword 2, then keyword 3.</p>
+  </div>
+</section>
+
+<section id="work" class="page">
+  <div class="split">
+    <div class="panel">
+      <div class="head"><h2>Encrypt</h2><span class="badge">plain → cipher</span></div>
+      <div id="encryptWarning" class="warning"></div>
+      <div><label for="plain">Plain text input</label><textarea id="plain" placeholder="TYPE OR PASTE PLAIN TEXT HERE..."></textarea></div>
+      <div class="actions"><button class="secondary" id="copyCipher" type="button">Copy Encrypted</button><button class="secondary" id="clearEncrypt" type="button">Clear</button><button class="secondary" id="pastePlainInput" type="button">Paste</button></div>
+      <div id="encryptStatus" class="clip-status"></div>
+      <div class="stats"><div class="stat">Plain letters<strong id="plainCount">0</strong></div><div class="stat">Lyric key<strong id="lyricCountA">0</strong></div></div>
+      <div><label>Cipher text output</label><div class="output" id="cipherOut"></div></div>
+    </div>
+    <div class="panel">
+      <div class="head"><h2>Decrypt</h2><span class="badge">cipher → plain</span></div>
+      <div id="decryptWarning" class="warning"></div>
+      <div><label for="cipherIn">Cipher text input</label><textarea id="cipherIn" placeholder="TYPE OR PASTE CIPHER TEXT HERE..."></textarea></div>
+      <div class="actions"><button class="secondary" id="copyPlainOutput" type="button">Copy Decrypted</button><button class="secondary" id="clearDecrypt" type="button">Clear</button><button class="secondary" id="pasteCipherInput" type="button">Paste</button></div>
+      <div id="decryptStatus" class="clip-status"></div>
+      <div class="stats"><div class="stat">Cipher letters<strong id="cipherCount">0</strong></div><div class="stat">Lyric key<strong id="lyricCountB">0</strong></div></div>
+      <div><label>Plain text output</label><div class="output" id="plainOut"></div></div>
+    </div>
+  </div>
+</section>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const clean = text => (text || '').toUpperCase().replace(/[^A-Z]/g, '');
+const num = c => c.charCodeAt(0) - 65;
+const chr = n => String.fromCharCode(((n % 26) + 26) % 26 + 65);
+let state = { lyrics:'', k1:'', k2:'', k3:'' };
+
+function setStatus(id,msg){const el=$(id); if(!el)return; el.textContent=msg; setTimeout(()=>{if(el.textContent===msg)el.textContent=''},1800)}
+function showWarn(el,msg,type='warn'){if(!el)return; el.textContent=msg; el.className='warning show '+type}
+function hideWarn(el){if(!el)return; el.textContent=''; el.className='warning'}
+
+function readSetup(){state.lyrics=clean($('lyrics').value); state.k1=clean($('k1').value); state.k2=clean($('k2').value); state.k3=clean($('k3').value); run()}
+function setupOk(){readSetup(); const missing=[]; if(!state.lyrics)missing.push('song lyrics'); if(!state.k1)missing.push('keyword 1'); if(!state.k2)missing.push('keyword 2'); if(!state.k3)missing.push('keyword 3'); if(missing.length){showWarn($('setupWarning'),'Before continuing, add: '+missing.join(', ')+'.','bad'); return false} hideWarn($('setupWarning')); return true}
+function validate(message,box){const missing=[]; if(!state.lyrics)missing.push('song lyrics'); if(!state.k1)missing.push('keyword 1'); if(!state.k2)missing.push('keyword 2'); if(!state.k3)missing.push('keyword 3'); if(missing.length){showWarn(box,'Missing setup: '+missing.join(', ')+'.','bad'); return false} if(message.length>state.lyrics.length){showWarn(box,'Message is longer than the available lyric key. Add more lyrics or shorten the message.','warn'); return false} hideWarn(box); return true}
+function transform(input,mode){
+  const letters=clean(input);
+  const box=mode==='enc' ? $('encryptWarning') : $('decryptWarning');
+
+  if(!letters){
+    hideWarn(box);
+    return '';
+  }
+
+  if(!validate(letters,box)) return '';
+
+  const applyShift = (text, stage, direction) => {
+    let out = '';
+
+    for(let i=0;i<text.length;i++){
+      let shift = 0;
+
+      if(stage === 1){
+        shift =
+          num(state.lyrics[i]) +
+          num(state.k1[i % state.k1.length]) +
+          (i % 26);
+      }
+
+      if(stage === 2){
+        shift =
+          num(state.k2[i % state.k2.length]) +
+          (i % 26);
+      }
+
+      if(stage === 3){
+        shift =
+          num(state.k3[i % state.k3.length]) +
+          (i % 26);
+      }
+
+      out += direction === 'forward'
+        ? chr(num(text[i]) + shift)
+        : chr(num(text[i]) - shift);
+    }
+
+    return out;
+  };
+
+  if(mode === 'enc'){
+    const stage1 = applyShift(letters, 1, 'forward');
+    const stage2 = applyShift(stage1, 2, 'forward');
+    return applyShift(stage2, 3, 'forward');
+  }
+
+  const stage2 = applyShift(letters, 3, 'reverse');
+  const stage1 = applyShift(stage2, 2, 'reverse');
+  return applyShift(stage1, 1, 'reverse');
+}
+function run(){ $('cipherOut').textContent=transform($('plain').value,'enc'); $('plainOut').textContent=transform($('cipherIn').value,'dec'); $('plainCount').textContent=clean($('plain').value).length; $('cipherCount').textContent=clean($('cipherIn').value).length; $('lyricCountA').textContent=state.lyrics.length; $('lyricCountB').textContent=state.lyrics.length}
+function switchPage(page){$('setup').classList.toggle('active',page==='setup'); $('work').classList.toggle('active',page==='work'); $('setupBtn').classList.toggle('active',page==='setup'); $('workBtn').classList.toggle('active',page==='work'); document.body.classList.toggle('cipher-page',page==='work')}
+function secure(on){$('lyrics').style.webkitTextSecurity=on?'disc':'none'; $('lyrics').classList.toggle('secure-mask',on); ['k1','k2','k3'].forEach(id=>{$(id).type=on?'password':'text'}); $('secureIndicator').classList.toggle('active',on); $('secureStatus').textContent=on?'ACTIVE':'VISIBLE'}
+function setTheme(theme){document.body.classList.remove('amber','blue','white'); if(theme==='amber')document.body.classList.add('amber'); if(theme==='blue')document.body.classList.add('blue'); if(theme==='white')document.body.classList.add('white'); ['green','amber','blue','white'].forEach(t=>{const b=$(t+'Theme'); if(b)b.classList.toggle('active',theme===t)}); try{localStorage.setItem('calliperTheme',theme)}catch(e){}}
+function loadTheme(){let theme='green'; try{theme=localStorage.getItem('calliperTheme')||'green'}catch(e){} setTheme(theme)}
+async function copyText(value,statusId){if(!value.trim()){setStatus(statusId,'Nothing to copy.'); return} try{await navigator.clipboard.writeText(value); setStatus(statusId,'Copied.')}catch(e){setStatus(statusId,'Copy not allowed.')}}
+async function pasteTo(id,statusId){try{$(id).value=await navigator.clipboard.readText(); readSetup(); setStatus(statusId,'Pasted.')}catch(e){setStatus(statusId,'Paste not allowed.')}}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  $('setupBtn').addEventListener('click',()=>switchPage('setup'));
+  $('workBtn').addEventListener('click',()=>{if(setupOk())switchPage('work')});
+  $('demoBtn').addEventListener('click',()=>{$('lyrics').value='It was the best of times it was the worst of times it was the age of wisdom it was the age of foolishness and the spring of hope.'; $('k1').value='ORANGE'; $('k2').value='RIVER'; $('k3').value='CLOCK'; readSetup()});
+  $('clearSetup').addEventListener('click',()=>{$('lyrics').value=''; $('k1').value=''; $('k2').value=''; $('k3').value=''; readSetup()});
+  $('secureMode').addEventListener('change',e=>secure(e.target.checked));
+  $('copyCipher').addEventListener('click',()=>copyText($('cipherOut').textContent,'encryptStatus'));
+  $('clearEncrypt').addEventListener('click',()=>{$('plain').value=''; $('cipherOut').textContent=''; readSetup(); setStatus('encryptStatus','Cleared.')});
+  $('pastePlainInput').addEventListener('click',()=>pasteTo('plain','encryptStatus'));
+  $('copyPlainOutput').addEventListener('click',()=>copyText($('plainOut').textContent,'decryptStatus'));
+  $('clearDecrypt').addEventListener('click',()=>{$('cipherIn').value=''; $('plainOut').textContent=''; readSetup(); setStatus('decryptStatus','Cleared.')});
+  $('pasteCipherInput').addEventListener('click',()=>pasteTo('cipherIn','decryptStatus'));
+  $('greenTheme').addEventListener('click',()=>setTheme('green'));
+  $('amberTheme').addEventListener('click',()=>setTheme('amber'));
+  $('blueTheme').addEventListener('click',()=>setTheme('blue'));
+  $('whiteTheme').addEventListener('click',()=>setTheme('white'));
+  ['lyrics','k1','k2','k3','plain','cipherIn'].forEach(id=>$(id).addEventListener('input',readSetup));
+  loadTheme(); $('secureMode').checked=true; secure(true); readSetup();
+});
+</script>
+</body>
+</html>
